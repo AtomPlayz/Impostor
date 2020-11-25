@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using Impostor.Api.Plugins;
 using Impostor.Server.Utils;
@@ -49,6 +50,10 @@ namespace Impostor.Server.Plugins
                 if (name.Name.Equals("Impostor.Api"))
                 {
                     return typeof(IPlugin).Assembly;
+                }
+                if (name.Name == "System.IO.Pipelines")
+                {
+                    return Assembly.LoadFile("/usr/share/dotnet/shared/Microsoft.AspNetCore.App/5.0.0-rc.2.20475.17/System.IO.Pipelines.dll");
                 }
 
                 var info = assemblyInfos.FirstOrDefault(a => a.AssemblyName.Name == name.Name);
