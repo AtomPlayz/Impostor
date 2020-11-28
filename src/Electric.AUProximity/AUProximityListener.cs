@@ -18,25 +18,6 @@ namespace Electric.AUProximity
         }
 
         [EventListener]
-        public void onChat(IPlayerChatEvent e)
-        {
-            if (!e.ClientPlayer.IsHost) return;
-            if (e.Message == "!maingroup")
-            {
-                _proximityHub.Clients.Group(e.Game.Code).GameStarted();
-            } else if (e.Message == "!spectatorgroup")
-            {
-                _proximityHub.Clients.Group(e.Game.Code).GameEnd();
-            } else if (e.Message == "!maintomutedgroup")
-            {
-                _proximityHub.Clients.Group(e.Game.Code).CommsSabotage(false);
-            } else if (e.Message == "!mutedtomaingroup")
-            {
-                _proximityHub.Clients.Group(e.Game.Code).CommsSabotage(true);
-            }
-        }
-
-        [EventListener]
         public void GameStart(IGameStartedEvent e)
         {
             _proximityHub.Clients.Group(e.Game.Code).GameStarted();
