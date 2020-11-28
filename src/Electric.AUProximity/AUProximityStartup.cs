@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Electric.AUProximity
 {
-    public class ProxProxStartup : IPluginStartup
+    public class AUProximityStartup : IPluginStartup
     {
         public void ConfigureHost(IHostBuilder host)
         {
@@ -32,7 +32,7 @@ namespace Electric.AUProximity
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSignalR();
-            services.AddSingleton<IEventListener, PlayerMoveListener>();
+            services.AddSingleton<IEventListener, AUProximityListener>();
         }
     }
 }

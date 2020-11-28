@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Impostor.Api;
+using Impostor.Api.Events.Managers;
 using Impostor.Api.Innersloth;
 using Impostor.Api.Net;
 using Impostor.Api.Net.Inner.Objects;
 using Impostor.Api.Net.Messages;
+using Impostor.Server.Events.Player;
 using Impostor.Server.Net.Inner.Objects.Systems;
 using Impostor.Server.Net.Inner.Objects.Systems.ShipStatus;
 using Impostor.Server.Net.State;
@@ -16,12 +18,14 @@ namespace Impostor.Server.Net.Inner.Objects
     internal class InnerShipStatus : InnerNetObject, IInnerShipStatus
     {
         private readonly ILogger<InnerShipStatus> _logger;
+        private readonly IEventManager _eventManager;
         private readonly Game _game;
         private readonly Dictionary<SystemTypes, ISystemType> _systems;
 
-        public InnerShipStatus(ILogger<InnerShipStatus> logger, Game game)
+        public InnerShipStatus(ILogger<InnerShipStatus> logger, IEventManager eventManager, Game game)
         {
             _logger = logger;
+            _eventManager = eventManager;
             _game = game;
 
             _systems = new Dictionary<SystemTypes, ISystemType>
@@ -83,6 +87,7 @@ namespace Impostor.Server.Net.Inner.Objects
 
                     var player = reader.ReadNetObject<InnerPlayerControl>(_game);
                     var amount = reader.ReadByte();
+                    _eventManager.CallAsync(new PlayerRepairSystemEvent(_game, sender, player, systemType, amount));
 
                     // TODO: Modify data (?)
                     break;

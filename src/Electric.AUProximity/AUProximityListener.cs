@@ -3,15 +3,16 @@ using Electric.AUProximity.Models;
 using Impostor.Api.Events;
 using Impostor.Api.Events.Meeting;
 using Impostor.Api.Events.Player;
+using Impostor.Api.Innersloth;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Electric.AUProximity
 {
-    public class PlayerMoveListener : IEventListener
+    public class AUProximityListener : IEventListener
     { 
         private readonly IHubContext<ProximityHub, IProximityHub> _proximityHub;
 
-        public PlayerMoveListener(IHubContext<ProximityHub, IProximityHub> proximityHub)
+        public AUProximityListener(IHubContext<ProximityHub, IProximityHub> proximityHub)
         {
             this._proximityHub = proximityHub;
         }
@@ -19,15 +20,19 @@ namespace Electric.AUProximity
         [EventListener]
         public void onChat(IPlayerChatEvent e)
         {
+            if (!e.ClientPlayer.IsHost) return;
             if (e.Message == "!maingroup")
             {
                 _proximityHub.Clients.Group(e.Game.Code).GameStarted();
             } else if (e.Message == "!spectatorgroup")
             {
                 _proximityHub.Clients.Group(e.Game.Code).GameEnd();
-            } else if (e.Message == "!mutedgroup")
+            } else if (e.Message == "!maintomutedgroup")
             {
                 _proximityHub.Clients.Group(e.Game.Code).CommsSabotage(false);
+            } else if (e.Message == "!mutedtomaingroup")
+            {
+                _proximityHub.Clients.Group(e.Game.Code).CommsSabotage(true);
             }
         }
 
@@ -62,6 +67,34 @@ namespace Electric.AUProximity
         {
             // Called when MeetingHud RPC VotingComplete has a player to be voted out.
             _proximityHub.Clients.Group(e.Game.Code).PlayerExiled(e.PlayerControl.PlayerInfo.PlayerName);
+        }
+        [EventListener]
+        public void RepairSystem(IPlayerRepairSystemEvent e)
+        {
+            if (e.SystemType == SystemTypes.Sabotage && (SystemTypes) e.Amount == SystemTypes.Comms)
+            {
+                // Skeld, MiraHQ, or Polus Comms has been sabotaged
+                _proximityHub.Clients.Group(e.Game.Code).CommsSabotage(false);
+            }
+            if (e.SystemType == SystemTypes.Comms)
+            {
+                if (e.Game.Options.Map == MapTypes.MiraHQ)
+                {
+                    if ((e.Amount & 0x10) != 0)
+                    {
+                        // MiraHQ Comms has been repaired
+                        _proximityHub.Clients.Group(e.Game.Code).CommsSabotage(true);
+                    }
+                }
+                else
+                {
+                    if ((e.Amount & 0x80) == 0)
+                    {
+                        // Skeld or Polus Comms has been repaired
+                        _proximityHub.Clients.Group(e.Game.Code).CommsSabotage(true);
+                    }
+                }
+            }
         }
         [EventListener]
         public void GameEnd(IGameEndedEvent e)

@@ -3,11 +3,11 @@
 namespace Electric.AUProximity
 {
     [ImpostorPlugin(
-        package: "electric.proxprox",
-        name: "ProxProx Plugin",
+        package: "electric.auproximity",
+        name: "AUProximity Plugin",
         author: "Cydon",
         version: "0.1.0")]
-    public class ProxProxPlugin : PluginBase
+    public class AUProximity : PluginBase
     {
     }
 }
